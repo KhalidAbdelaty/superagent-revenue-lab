@@ -51,3 +51,16 @@ def test_replayed_event_does_not_create_revenue_on_the_receipt_day():
     report = daily_revenue(events)
     assert report["day"].tolist() == ["2026-10-30"]
     assert report["revenue_cents"].tolist() == [4000]
+
+
+def test_identical_payments_on_one_order_count_once_each_despite_a_replay():
+    # A customer can pay twice on one order: the two payments share order_id,
+    # occurred_at and amount_cents but have different event_ids. Both count; a
+    # replay of one of them must not add a third payment.
+    events = frame([
+        ("evt_pay1", "ord_2", "2026-10-30T12:00:00Z", "2026-10-30T12:00:01Z", 5000),
+        ("evt_pay2", "ord_2", "2026-10-30T12:00:00Z", "2026-10-30T12:00:02Z", 5000),
+        ("evt_pay1", "ord_2", "2026-10-30T12:00:00Z", "2026-10-30T12:06:30Z", 5000),
+    ])
+    report = daily_revenue(events)
+    assert report["revenue_cents"].tolist() == [10000]
