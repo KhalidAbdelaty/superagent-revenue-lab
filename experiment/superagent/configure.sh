@@ -1,7 +1,20 @@
 #!/bin/bash
-# Saves settings through the Management API (docs/006-deployment.md). Run as superagent while the service runs.
+# Saves Superagent settings through the Management API (docs/006-deployment.md).
+# Run as the superagent OS user while the service runs.
+#
+# Before you run it:
+#   - set REPO to YOUR experiment repository (owner/name); the default is the author's run-1 repository
+#   - set ALLOWED to the GitHub login allowed to request work; the default is the author's account
+#   - make sure the local clone exists at ~/src/<repo name> (setup-user.sh creates it); the prepare command adds worktrees from it
+#
+# Order used in all three runs:
+#   1. REPO=... ALLOWED=... bash configure.sh all        # observeCi stays OFF (the default) while you confirm a green baseline
+#   2. REPO=... OBSERVE_CI=true bash configure.sh source # turn default-branch CI observation ON; the first reading is the baseline
+#   3. bash configure.sh show                            # final state: observeCi true, CI admission inferred, eval mode observe
+# The article shows that final state, not this script's first pass.
 set -e
 REPO="${REPO:-KhalidAbdelaty/superagent-revenue-lab}"   # owner/name of the experiment repository
+ALLOWED="${ALLOWED:-KhalidAbdelaty}"                    # GitHub login allowed to request work
 api=http://127.0.0.1:3082/orchestrator/api
 H=(-H 'x-orchestrator-request: 1' -H 'content-type: application/json')
 rev() { curl -s "${H[@]}" $api/settings | jq "$1"; }
@@ -20,9 +33,9 @@ if [ "$STEP" = policy ] || [ "$STEP" = all ]; then
   read -r -d '' RULE <<'R' || true
 A default-branch CI result in which the check named revenue-integrity newly fails. That check runs the pytest suite guarding the daily revenue totals produced by revenue/pipeline.py. Judge only from the check names and results you can read for that commit; do not guess a root cause. Failures limited to other checks, such as docs-check (README links), do not match. A recovery where every check passes does not match. Work, if accepted: investigate the failing revenue-integrity tests, fix the pipeline without weakening or deleting any assertion, add a regression test, and open a pull request for human review. Never merge.
 R
-  jq -n --arg ins "$RULE" --argjson r "$r" '{value: {
+  jq -n --arg ins "$RULE" --arg who "$ALLOWED" --argjson r "$r" '{value: {
       rules: [{id: "revenue-integrity", name: "Revenue integrity CI failures", enabled: true, instruction: $ins}],
-      sources: {github: {allowed: [{id: "KhalidAbdelaty"}], bots: [], admission: {ci: {unlistedUnaddressed: "inferred"}}}}},
+      sources: {github: {allowed: [{id: $who}], bots: [], admission: {ci: {unlistedUnaddressed: "inferred"}}}}},
     revision: $r}' > /tmp/policy.json
   curl -s -X PUT "${H[@]}" "$api/settings/policy" -d @/tmp/policy.json; echo
 fi
