@@ -39,3 +39,15 @@ def test_replayed_event_is_counted_once():
     ])
     report = daily_revenue(events)
     assert report["revenue_cents"].tolist() == [4000]
+
+
+def test_replayed_event_does_not_create_revenue_on_the_receipt_day():
+    # A replay can arrive after midnight; the duplicate must not add revenue to
+    # another day or count the original event twice.
+    events = frame([
+        ("evt_r", "ord_9", "2026-10-30T23:59:00Z", "2026-10-30T23:59:01Z", 4000),
+        ("evt_r", "ord_9", "2026-10-30T23:59:00Z", "2026-10-31T00:00:30Z", 4000),
+    ])
+    report = daily_revenue(events)
+    assert report["day"].tolist() == ["2026-10-30"]
+    assert report["revenue_cents"].tolist() == [4000]
