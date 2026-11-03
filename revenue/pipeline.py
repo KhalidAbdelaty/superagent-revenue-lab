@@ -9,6 +9,10 @@ def load_events(path):
 
 def daily_revenue(events):
     """Return one row per UTC day with total revenue in cents."""
+    # The payment webhook may deliver the same event more than once, with a
+    # different received_at but the same event_id. One event_id is one payment
+    # event, so keep only its first delivery before aggregating.
+    events = events.drop_duplicates(subset="event_id", keep="first")
     days = events["occurred_at"].dt.strftime("%Y-%m-%d")
     report = (
         events.assign(day=days)
