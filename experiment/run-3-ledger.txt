@@ -1,0 +1,29 @@
+# Run 3 ledger (UTC, 2026-11-03). Repo KhalidAbdelaty/superagent-revenue-lab-run3 (public). Fresh WSL distro dsh-superagent-lab-run3, same pinned versions, policy version 1c28641d3b232d93891cb4999a919a5f, eval observe, deepseek-flash. Runs 1 and 2 services stopped; agent notifications marked read before start.
+- 01:41:00 baseline 05f1a0a run 41561325142 success
+- 11:20:05 balance 5.72 USD; service started (exit 3 repositoryUnset), settings saved
+- 11:20:27 observeCi on; KV github-branch-ci {failures:[],revision:0}, 0 Triggers
+- 11:21:57 pushed negative 57e0a30; run 41626924960: docs-check failure 11:22:05, revenue-integrity success 11:22:19
+- 11:22:26.417 TRIGGER a519bf35 "CI failed 1/2 on main at 57e0a30: docs-check" (7 s after CI); 11:22:29.992 DECISION f533db24 ignore ignoredFromCard "Only docs-check failed (1/2 checks); the revenue-integrity check is not failing, so no enabled rule matches." No ticket.
+- 11:23:48 pushed restore 11e3101; checks success 11:24:01/11:24:08; 11:24:34.010 TRIGGER e2c740c0 "CI passed 2/2"; 11:24:36.031 DECISION 1e8b7af4 ignore ignoredFromCard. No ticket.
+- 11:25:36 pushed incident 27cfa77; docs-check success 11:25:44, revenue-integrity failure 11:25:55
+- 11:26:41.035 TRIGGER 518d1f69 "CI failed 1/2 on main at 27cfa77: revenue-integrity" (46 s after CI); 11:26:57.971 DECISION b632c711 ignore observed would_accept=true, rule matched; evidence = checks for 27cfa77 (revenue-integrity failure, docs-check success) + previous main 11e3101 passed; proposal "Fix revenue-integrity CI failure on main". tickets 0.
+- 11:27:21 Issue #1 (mention in body); notification updated_at 11:27:43 (22 s); cursor:1 11:28:39; NO TRIGGER (missed, 3rd run of 3)
+- 11:29:26 comment 1 (untimed); notification 11:29:49 (23 s); NO TRIGGER (missed)
+- 11:31:53 comment 2 (timed on my wrong guess of the poll boundary); notification 11:32:16; NO TRIGGER (missed)
+- Source analysis (src/sources/github.ts @6337fc8): notifications are listed since github-since = previous round start - 5 s; each thread is read from max(thread cursor, that since); intakeComments() drops comments with timestamp < since and readNotified() reads an Issue body only if created_at >= since. A mention is lost when a polling round starts more than 5 s after the post but before GitHub publishes the notification (21-23 s later in these runs).
+- 11:35:11 comment 3, posted ~1 s after KV github-since changed (round start 11:35:09.8); 11:36:19.328 DECISION 0b2c2474 accept explicitRouted; TICKET 3a9f0597; assignment f859aa36 started 11:36:21.116 (68 s after comment 3)
+- 11:36:19 agent ack on Issue #1 without disclosure line
+- 11:38:39 PR #2 by tester-31op, branch agent/fix-revenue-overcount-3a9f05970341, head db31b38 (140 s after ticket); fix events.drop_duplicates(subset="event_id", keep="first") + comment; PR body starts with disclosure line
+- 11:38:49 HOLDOUT on db31b38: 5 passed; visible 4 passed; pipeline +3/-0, tests +13/-0, 0 removed test lines
+- 11:39:00 review CHANGES_REQUESTED (same text); TRIGGER 4756b955 delivered to ticket, no Eval; 11:39:46 agent ack on PR without disclosure; 11:40:19 commit 4229105 test-only (+13); no history rewrite and no Co-authored-by trailer this run
+- 11:40:52.843 TRIGGER e001c7f3 "CI passed 2/2 on PR #2 at 4229105" -> DECISION b76eb72f ignore not_human (first PR CI on db31b38 produced no Trigger: PR baseline)
+- worker turn 2 ended 11:41:08; 11:42:06 HOLDOUT on 4229105: 5 passed; visible 5 passed; pipeline +3/-0, tests +26/-0, 0 removed test lines; PR CI pass
+- 11:42:17 APPROVE on 4229105 (head re-checked just before); 11:42:20 merged -> c5844e5; approval TRIGGER 49001ad0 delivered to ticket; assignment f859aa36 ended 11:42:20; resume assignment 01be6fd3 11:43:07.477 -> 11:43:20.030; ticket ended outcome=merged 11:43:20.030
+- 11:42:31/11:42:42 main run 41629676745 on c5844e5 success; 11:43:11.959 TRIGGER b7aae6f6 "CI passed 2/2 on main at c5844e5"; 11:43:14.005 DECISION b5912bbf ignore ignoredFromCard. No new ticket.
+- 11:43:45 balance 5.69 USD
+## Usage (deepseek-flash, off-peak, no Search/Fetch tool calls)
+- main session: 23 steps, 10 turns, 12 tool calls; uncached 14,176; cache-read 447,488; out 4,917
+- worker: 54 steps, 63 tool calls, 3 turns 182.3 s / 86.7 s / 15.0 s; uncached 30,872; cache-read 2,003,328; out 23,182
+- total $0.0310 off-peak ($0.0619 peak)
+## Durations
+- incident CI failure 11:25:55 -> merge 11:42:20 = 16m25s; mention misses 11:27:21 -> 11:35:11 = 7m50s; accepted comment -> merge 7m09s; comment -> ticket 68 s; ticket -> PR 140 s; review -> new commit 79 s

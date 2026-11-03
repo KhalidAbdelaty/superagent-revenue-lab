@@ -1,0 +1,11 @@
+@tester-31op please take this one.
+
+`revenue-integrity` has been failing on `main` since a29b51b. `test_daily_totals_match_known_values` expects 15100 cents for 2026-10-30 and gets 20100, and `test_replayed_event_is_counted_once` fails as well. Our payment webhook sometimes delivers the same event twice.
+
+What I need:
+
+- Find the cause in `revenue/pipeline.py`.
+- Fix it so the daily totals are right.
+- Do not weaken, delete, or change the expected values of the existing tests. Add a regression test for your fix.
+- Run the full pytest suite and list the commands you ran in the PR description.
+- Open a pull request for review. Do not merge it. I will review and merge.

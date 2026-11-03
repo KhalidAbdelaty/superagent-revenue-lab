@@ -1,0 +1,59 @@
+# Run ledger (UTC). Source of every number in the article.
+- 2026-11-03T00:20:23Z holdout frozen (sha256 in human/HOLDOUT_SHA256.txt), kept only in the cloud workspace, never on the agent machine
+- 2026-11-03T00:21:50Z run 41552308215 on fa576fe: revenue-integrity FAILED (my mistake: ModuleNotFoundError 'revenue', bare pytest without pythonpath). Superagent not installed yet.
+- 2026-11-03T00:23:27Z run 41552499808 on a6d2036 (pytest.ini pythonpath=.): revenue-integrity success, docs-check success. BASELINE GREEN.
+- ruleset 26412207 active on main: PR + 1 approval (last-push approval, dismiss stale), required checks revenue-integrity + docs-check, no deletion/force-push; repo admin bypass.
+- agent account tester-31op: push (write) collaborator, not admin.
+- 2026-11-03T00:30:26Z pushed negative control 74b3df5: README links missing docs/data-dictionary.md; revenue code/data/tests unchanged
+- 00:29:43Z observeCi on; 00:30:19Z KV github-branch-ci {branch:main,failures:[],revision:0}, 0 Triggers (baseline)
+- 00:30:38Z run 41553338966 on 74b3df5: docs-check failure; 00:30:52Z revenue-integrity success
+- 00:31:10.064Z TRIGGER a519bf35 "CI failed 1/2 on main at 74b3df5: docs-check" thread ci:main human:false revision 1; KV failures [docs-check]
+- 00:31:20.848Z DECISION dd870456 kind=ignore reason=[ignoredFromCard, said "Only docs-check failed at 74b3df5; revenue-integrity succeeded, so the revenue-integrity rule does not match."] strength=inferred policyVersion=1c28641d. No ticket. (10.8 s trigger->decision; 18 s CI-complete->trigger)
+- 2026-11-03T00:32:17Z pushed restore 23babf4 (revert of 74b3df5)
+- 00:32:30Z/00:32:41Z run 41553568448 on 23babf4: both success
+- 00:33:09.701Z TRIGGER e2c740c0 "CI passed 2/2 on main at 23babf4" revision 2; KV failures []
+- 00:33:11.594Z DECISION 0d2e29ef kind=ignore reason=[ignoredFromCard, said "All checks passed at 23babf4 (2/2), so there is no revenue-integrity failure to act on."] No ticket.
+- 2026-11-03T00:33:45Z pushed incident a29b51b: 5 rows for 2026-10-30 incl. evt_1009 replay (received 10:07:45), expected 2026-10-30 = 15100 (independent csv-module calc), regression test test_replayed_event_is_counted_once. Local: 2 failed, 1 passed, 3/3 repeats identical
+- 00:33:56Z/00:34:08Z run 41553741237 on a29b51b: docs-check success, revenue-integrity FAILURE (2026-10-30: 20100 != 15100; replay test 8000 != 4000)
+- 00:35:09.482Z TRIGGER 518d1f69 "CI failed 1/2 on main at a29b51b: revenue-integrity" revision 3 (61 s after CI completion)
+- 00:35:32.111Z DECISION 56e7cdc0 kind=ignore code=observed would_accept=true; full assessment: rule revenue-integrity matched; evidence = checks resource (names+conclusions), not logs; proposal title "Fix newly failing revenue-integrity check on main", worktree fix-revenue-integrity. tickets=0, load running 0 queued 0. (22.6 s trigger->decision)
+- 00:36:47Z Issue #1 opened by KhalidAbdelaty with @tester-31op in the BODY (explicit request, no-merge instruction)
+- 00:37:10Z notification (reason=mention) updated_at on agent account (23 s after issue)
+- MISSED: no Trigger. KV github-cursor:1=00:38:00.528Z (read in round ~00:38:05 with since ~00:37:00 > created_at 00:36:47) -> body skipped by `created_at >= since` in readNotified(); matches community Discussion #11700 late-notification report. Source stats received=3 filtered=0 dropped=[].
+- 00:40:09Z comment 6592259520 by KhalidAbdelaty mentioning @tester-31op (posted 2.5 s after a poll boundary, workaround per docs/006 "post a new comment")
+- 00:41:09.226Z TRIGGER 948fcdb7 thread github:1 human:true addressed:mention (60 s after comment)
+- 00:41:14.778Z DECISION 75330e32 kind=accept reason=explicitRouted strength=explicit; mandate row=comments sender=KhalidAbdelaty via=addressed; scope "Fix revenue/pipeline.py overcounting 2026-10-30, keep tests unchanged, add regression test, open PR"
+- 00:41:14.778Z TICKET 203b0243 created; assignment 14e6d18d started 00:41:16.889Z. load running=1
+- 00:41:15Z agent ack comment 6592275175 on Issue #1 ("On it: ...") WITHOUT the disclosure line (prompt instruction in prompts/team/communication.md not followed)
+- 00:42:45Z PR #2 by tester-31op, branch agent/fix-revenue-overcount-203b0243bfbe, head 9d7e7d9; +16 -0, 2 files; fix = events.drop_duplicates(subset="event_id", keep="first"); new test test_replayed_event_does_not_create_revenue_on_the_receipt_day; PR body starts with disclosure, lists commands (venv, pytest -v 4 passed, check_docs exit 0), "Refs #1. Not to be merged by the agent". Commit author tester-31op noreply.
+- 00:42:58Z/00:43:12Z PR checks: docs-check success, revenue-integrity success
+- 00:43:38Z HOLDOUT on 9d7e7d9 (hashes OK): 5 passed; visible tests 4 passed; tests/ diff +12 -0
+- 00:43:50Z review 5745480994 CHANGES_REQUESTED by KhalidAbdelaty on PR #2 (same-order edge case: same order_id/occurred_at/amount, different event_id; plus replay of one; "add the test only" if code already handles it). No mention.
+- 00:44:22.357Z TRIGGER 4ac5400d thread github:2 delivered as INPUT to ticket 203b0243, assignment 14e6d18d (same worker), readAt 00:44:22.464Z. No new Eval/Decision (subscription path).
+- 00:44:25Z agent ack comment 6592321250 on PR #2 ("On it: adding a test ... leaving revenue/pipeline.py unchanged if it already passes") again WITHOUT disclosure line
+- ~00:44:48Z force-push: 9d7e7d9 rewritten to 9066de5 (same tree fda4d789, adds Co-authored-by: KhalidAbdelaty trailer per default Delivery prompt) + new commit a43c541 "Add test for identical payments sharing one order" (+13 -0 tests only). PR body updated: 5 passed. Pipeline unchanged.
+- 00:45:13Z/00:45:24Z PR checks on a43c541: docs-check success, revenue-integrity success
+- 00:45:30.747Z TRIGGER e001c7f3 "CI passed 2/2 on PR #2 at a43c541" delivered to ticket as Input; DECISION 962a4db2 ignore not_human (CI cannot authorize). (First PR CI on 9d7e7d9 produced no Trigger = PR CI baseline.)
+- 00:46:06Z HOLDOUT on a43c541 (hashes OK): 5 passed; visible 5 passed; diff vs a29b51b: pipeline.py +4 -0, tests +25 -0, 0 removed test lines. load running 0 at 00:46:15Z.
+- 00:46:27Z APPROVE review 5745499766; 00:46:30Z merged by KhalidAbdelaty -> 62bac08
+- 00:46:30Z assignment 14e6d18d ended (worker turn span 00:41:16.889 -> 00:46:30)
+- 00:46:35Z approval trigger e34608ad resumed ended ticket (input kind=resumed); assignment 75d3ec88 00:46:35.129 -> 00:46:51.239
+- 00:46:51.239Z TICKET 203b0243 ended: by=executor outcome=merged (read from orchestrator.sqlite after the run)
+- 00:46:41Z/00:46:56Z run 41555230407 on 62bac08: both success
+- 00:47:38.240Z TRIGGER b7aae6f6 "CI passed 2/2 on main at 62bac08" revision 4; 00:47:40.292Z DECISION 2bb2052b ignore ignoredFromCard "All checks passed on main at 62bac08 (2/2), so there is no revenue-integrity failure to act on." No new ticket. load 0.
+- 00:53:18Z balance 5.74 USD (before 5.77 at 00:28:36Z) -> 0.03 at 2-decimal precision
+## Usage (DSH session logs, data.usage on assistant/message), all deepseek-flash, all calls 00:31-00:47 UTC Tue = off-peak
+- router/orchestrator: 27 steps, 10 turns; uncached in 23,063; cache-read 538,624; out 6,079 -> $0.0087
+  turns: negctl 10.5s(4 steps), recovery1 3.5s, incident eval 25.0s(7 steps), explicit route 7.8s, others 3-12s
+- worker: 51 steps, 62 tool calls, 3 turns: 146.2s (31 steps, initial fix+PR), 83.3s (15 steps, review), 18.7s (5 steps, after approval/merge); uncached 32,533; cache-read 1,504,896; out 16,887 -> $0.0195
+- total $0.0282 (off-peak rates hit 0.003 / miss 0.15 / out 0.60 per 1M); peak equivalent $0.0565
+- worker commands: python -m pytest (failed: no deps), pip3 install (externally-managed), python3 -m venv .venv + pip install, pytest -v, ad-hoc repro script, check_docs.py, commit as tester-31op noreply, push, gh pr create, gh pr checks --watch
+## Durations
+- incident CI failure 00:34:08 -> merge 00:46:30 = 12m22s; explicit comment 00:40:09 -> merge = 6m21s; comment -> Ticket 65 s; Ticket -> PR 91 s; review -> new commit pushed ~58 s; human review+holdout ~3 m.
+## Versions
+- Windows 11 host build 10.0.26300, WSL 2.4.11, kernel 5.15.167.4, distro Ubuntu 24.04 LTS (fresh import, automount+interop off), OS user superagent
+- Node 22.20.0, pnpm 11.7.0, git 2.43.0, tmux 3.4, Python 3.12.3 (agent box), gh 2.83.1, dsh 0.2.1-rc.3, dsh-superagent 0.1.0 @ 6337fc8
+- CI: ubuntu-24.04 runner, actions/checkout@v4, actions/setup-python@v5 -> Python 3.12.15, pandas 2.3.3, pytest 8.4.2
+- Runs: 1 end-to-end run (no repeats).
+- Post-run checks 2026-11-03: holdout re-run on 62bac08: 5 passed (hashes OK), visible 5 passed. Wrong-fix controls on the holdout: no dedup -> 2 failed; drop_duplicates by order_id -> 3 failed; by order_id+occurred_at+amount -> 3 failed.
+- Post-run check: session logs contain 0 Search/Fetch tool calls (orchestrator: skill, bash, orchestrator_* tools; worker: bash 35, read 3, edit 2, glob 1, job_output 9, orchestrator_* tools). DeepSeek pricing page: Search/Fetch through Harness billed per request from 2026-11-01; none incurred in this run.

@@ -1,0 +1,32 @@
+# Run 2 ledger (UTC, 2026-11-03). Repo KhalidAbdelaty/superagent-revenue-lab-run2 (public). Fresh WSL distro dsh-superagent-lab-run2, same pinned versions, same policy version 1c28641d3b232d93891cb4999a919a5f, eval observe, model deepseek-flash. Run-1 service stopped during this run.
+- 01:40:35 baseline 9c68f18 run 41561278956 success (repo created by prep.ps1; agent invitation accepted, agent notifications marked read)
+- 10:58:38 balance 5.74 USD; service started (exit 3 repositoryUnset as documented), settings saved, status all ready
+- 10:59:09 observeCi on; KV github-branch-ci {failures:[],revision:0}, 0 Triggers (baseline)
+- 11:00:33 pushed negative 228a358 (README links missing docs/data-dictionary.md); run 41623948096: docs-check failure 11:00:43, revenue-integrity success 11:00:53
+- 11:01:03.802 TRIGGER a519bf35 "CI failed 1/2 on main at 228a358: docs-check" (10.8 s after CI); 11:01:08.444 DECISION 434f74e8 ignore ignoredFromCard "The only failing check is docs-check (1/2 failed); the revenue-integrity check passed, so the enabled revenue-integrity rule does not match." No ticket.
+- 11:02:19 first restore attempt pushed nothing (my script bug: git revert -q); 11:03:11 pushed restore 96a14e3; checks success 11:03:21/11:03:27
+- 11:04:15.457 TRIGGER e2c740c0 "CI passed 2/2 on main at 96a14e3"; 11:04:17.419 DECISION 7af4148a ignore ignoredFromCard. No ticket.
+- 11:05:05 pushed incident b921df8; revenue-integrity failure 11:05:21, docs-check success 11:05:13
+- 11:06:24.033 TRIGGER 518d1f69 "CI failed 1/2 on main at b921df8: revenue-integrity" (63 s after CI); 11:06:34.076 DECISION 46bac447 ignore observed would_accept=true, rule revenue-integrity matched, evidence = CI card + preceding main results; proposal "Fix newly failing revenue-integrity check on main (b921df8)". tickets 0.
+- 11:07:10 Issue #1 created (mention in body); agent notification updated_at 11:07:32 (22 s later); github-cursor:1 11:08:23.247; NO TRIGGER for the Issue body (missed again, same as run 1)
+- 11:09:48 comment by KhalidAbdelaty (posted without poll-boundary timing); 11:10:45.794 DECISION 43754b0d accept explicitRouted; TICKET 5a665525 11:10:45.793 (57 s after comment); assignment 88bd603d started 11:10:47.715
+- 11:10:45 agent ack on Issue #1 ("On it: ...") without disclosure line
+- 11:12:12 PR #2 by tester-31op, branch agent/fix-revenue-overcount-5a66552576f9, head b0f2c74 (87 s after ticket). Fix: events.drop_duplicates(subset=["event_id"], keep="first") + docstring; new test; PR body starts with disclosure line. PR CI pass.
+- 11:13:0x HOLDOUT on b0f2c74 (hashes OK): 5 passed; visible 4 passed; diff vs b921df8 pipeline +6/-1 (docstring), tests +12/-0, 0 removed test lines
+- 11:13:13 review CHANGES_REQUESTED (same text as run 1); TRIGGER 369779a2 delivered to ticket, no Eval
+- 11:14:14 agent ack on PR #2 without disclosure; 11:14:35 commit a78eb93 test-only (+14), pipeline unchanged
+- 11:15:15 TRIGGER e001c7f3 "CI passed 2/2 on PR #2 at a78eb93" -> DECISION 9f0d1f93 ignore not_human
+- 11:16:03 HOLDOUT on a78eb93: 5 passed; visible 5 passed; 0 removed test lines
+- ~11:16:1x worker rewrote both commits (b0f2c74->e2e924f, a78eb93->f4938f9) adding Co-authored-by: KhalidAbdelaty trailers and force-pushed; tree unchanged vs a78eb93 (empty diff)
+- 11:16:14 APPROVE review posted on f4938f9 seconds after the rewrite, BEFORE I had re-run the holdout on that exact commit (my procedural slip); 11:16:16 first merge attempt blocked by ruleset (PR CI pending). 11:16:23 TRIGGER a956c487 "CI running 1/2 on PR #2 at f4938f9" -> DECISION 409377af ignore not_human. Approval TRIGGER 995675fd delivered to ticket.
+- 11:16:34 HOLDOUT on f4938f9: 5 passed; visible 5 passed; 0 removed test lines. PR CI on f4938f9 pass.
+- 11:16:54 merged by KhalidAbdelaty -> de73435; ticket 5a665525 ended outcome=merged at 11:16:54 (single assignment 88bd603d, 11:10:47.715 -> 11:16:54; no resume assignment this run)
+- 11:17:08/11:17:18 main run 41626234984 on de73435 success; 11:17:33.227 TRIGGER b7aae6f6 "CI passed 2/2 on main at de73435"; 11:17:35.131 DECISION d068acdb ignore ignoredFromCard. No new ticket.
+- 11:19:08 balance 5.72 USD
+## Usage (all deepseek-flash, off-peak, no Search/Fetch tool calls)
+- main session: 26 steps, 10 turns, 18 tool calls; uncached 14,468; cache-read 536,064; out 8,116
+- worker: 50 steps, 56 tool calls, 3 turns 129.9 s / 87.3 s / 35.7 s; uncached 24,004; cache-read 1,460,352; out 19,447
+- total $0.0283 off-peak ($0.0566 peak)
+## Durations
+- incident CI failure 11:05:21 -> merge 11:16:54 = 11m33s; Issue-body miss cost 11:07:10 -> 11:09:48 = 2m38s; comment -> merge 7m06s; comment -> ticket 57 s; ticket -> PR 87 s; review -> new commit 82 s
+- Note: Trigger IDs for CI cards repeat across runs (e.g. a519bf35, e2c740c0, 518d1f69, e001c7f3, b7aae6f6); they are deterministic per thread and revision, so cite them with the run.
